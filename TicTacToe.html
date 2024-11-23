@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f3f3f3;
+            background-color: #333;
             margin: 0;
             padding: 0;
             display: flex;
@@ -15,11 +15,12 @@
             align-items: center;
             min-height: 100vh;
             flex-direction: column;
+            color: white;
         }
 
         h1 {
             font-size: 3rem;
-            color: #e94e77;
+            color: #ff5c5c;
             margin-bottom: 30px;
         }
 
@@ -95,20 +96,19 @@
             text-transform: uppercase;
         }
 
-        select, button {
-            font-size: 1.2rem;
+        button, select {
+            margin: 10px;
             padding: 10px 20px;
-            margin-right: 10px;
-            cursor: pointer;
-            background-color: #6f68f3;
+            font-size: 16px;
+            background-color: #02c0d9ea;
             color: white;
             border: none;
             border-radius: 5px;
-            transition: background-color 0.3s ease;
+            cursor: pointer;
         }
 
-        select:hover, button:hover {
-            background-color: #3d27ae;
+        button:hover, select:hover {
+            background-color: #00929c;
         }
 
         button {
