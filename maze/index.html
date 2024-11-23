@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Generator and Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #333;
+        }
+
+        h1 {
+            margin: 20px;
+            color: #ff5c5c;
+        }
+
+        #maze-container {
+            display: inline-block;
+            margin: 20px;
+        }
+
+        canvas {
+            border: 2px solid #fffdfd;
+        }
+
+        #controls {
+            margin-top: 20px;
+        }
+
+        button, select {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color:#0098b3 ;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover, select:hover {
+            background-color: #037b96;
+        }
+
+        select {
+            color: black;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Maze Generator and Solver</h1>
+    <div id="maze-container">
+        <canvas id="maze" width="400" height="400"></canvas>
+    </div>
+    <div id="controls">
+        <select id="difficulty">
+            <option value="10">Easy</option>
+            <option value="20" selected>Medium</option>
+            <option value="30">Hard</option>
+        </select>
+        <button onclick="generateMaze()">Generate Maze</button>
+        <button onclick="solveMaze()">Solve Maze</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("maze");
+        const ctx = canvas.getContext("2d");
+
+        let rows, cols, cellSize;
+        let grid = [];
+        let stack = [];
+        let current;
+        let path = [];
+
+        function initializeGrid() {
+            grid = [];
+            rows = cols = parseInt(document.getElementById("difficulty").value);
+            cellSize = canvas.width / cols;
+
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    grid.push(new Cell(row, col));
+                }
+            }
+
+            current = grid[0];
+            stack = [];
+            path = [];
+        }
+
+        class Cell {
+            constructor(row, col) {
+                this.row = row;
+                this.col = col;
+                this.walls = [true, true, true, true]; // top, right, bottom, left
+                this.visited = false;
+            }
+
+            draw() {
+                const x = this.col * cellSize;
+                const y = this.row * cellSize;
+
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 2;
+
+                if (this.walls[0]) drawLine(x, y, x + cellSize, y); // top
+                if (this.walls[1]) drawLine(x + cellSize, y, x + cellSize, y + cellSize); // right
+                if (this.walls[2]) drawLine(x + cellSize, y + cellSize, x, y + cellSize); // bottom
+                if (this.walls[3]) drawLine(x, y + cellSize, x, y); // left
+
+                if (this.visited) {
+                    ctx.fillStyle = "#FFF";
+                    ctx.fillRect(x, y, cellSize, cellSize);
+                }
+            }
+
+            checkNeighbors() {
+                const neighbors = [];
+
+                const top = grid[getIndex(this.row - 1, this.col)];
+                const right = grid[getIndex(this.row, this.col + 1)];
+                const bottom = grid[getIndex(this.row + 1, this.col)];
+                const left = grid[getIndex(this.row, this.col - 1)];
+
+                if (top && !top.visited) neighbors.push(top);
+                if (right && !right.visited) neighbors.push(right);
+                if (bottom && !bottom.visited) neighbors.push(bottom);
+                if (left && !left.visited) neighbors.push(left);
+
+                return neighbors.length > 0
+                    ? neighbors[Math.floor(Math.random() * neighbors.length)]
+                    : undefined;
+            }
+        }
+
+        function getIndex(row, col) {
+            return row >= 0 && col >= 0 && row < rows && col < cols
+                ? row * cols + col
+                : -1;
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+
+        function removeWalls(a, b) {
+            const dx = a.col - b.col;
+            const dy = a.row - b.row;
+
+            if (dx === 1) {
+                a.walls[3] = false;
+                b.walls[1] = false;
+            } else if (dx === -1) {
+                a.walls[1] = false;
+                b.walls[3] = false;
+            }
+
+            if (dy === 1) {
+                a.walls[0] = false;
+                b.walls[2] = false;
+            } else if (dy === -1) {
+                a.walls[2] = false;
+                b.walls[0] = false;
+            }
+        }
+
+        function generateMaze() {
+            initializeGrid();
+
+            const generate = () => {
+                current.visited = true;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                grid.forEach(cell => cell.draw());
+
+                // Highlight start and end points
+                highlightCell(grid[0], "green"); // Start
+                highlightCell(grid[grid.length - 1], "red"); // End
+
+                const next = current.checkNeighbors();
+                if (next) {
+                    next.visited = true;
+                    stack.push(current);
+                    removeWalls(current, next);
+                    current = next;
+                } else if (stack.length > 0) {
+                    current = stack.pop();
+                }
+
+                if (stack.length > 0 || current !== grid[0]) {
+                    requestAnimationFrame(generate);
+                }
+            };
+
+            generate();
+        }
+
+        function highlightCell(cell, color) {
+            const x = cell.col * cellSize;
+            const y = cell.row * cellSize;
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
+        }
+
+        function solveMaze() {
+            const queue = [];
+            const start = grid[0];
+            const end = grid[grid.length - 1];
+            const cameFrom = new Map();
+
+            queue.push(start);
+            cameFrom.set(start, null);
+
+            while (queue.length > 0) {
+                const current = queue.shift();
+
+                if (current === end) break;
+
+                const neighbors = [
+                    grid[getIndex(current.row - 1, current.col)], // top
+                    grid[getIndex(current.row, current.col + 1)], // right
+                    grid[getIndex(current.row + 1, current.col)], // bottom
+                    grid[getIndex(current.row, current.col - 1)]  // left
+                ];
+
+                neighbors.forEach((neighbor, i) => {
+                    if (neighbor && !cameFrom.has(neighbor) && !current.walls[i]) {
+                        queue.push(neighbor);
+                        cameFrom.set(neighbor, current);
+                    }
+                });
+            }
+
+            let current = end;
+            path = [];
+            while (current) {
+                path.push(current);
+                current = cameFrom.get(current);
+            }
+
+            drawPath();
+        }
+
+        function drawPath() {
+            for (let i = path.length - 1; i > 0; i--) {
+                const current = path[i];
+                const next = path[i - 1];
+
+                const x1 = current.col * cellSize + cellSize / 2;
+                const y1 = current.row * cellSize + cellSize / 2;
+                const x2 = next.col * cellSize + cellSize / 2;
+                const y2 = next.row * cellSize + cellSize / 2;
+
+                ctx.fillStyle = "#000";
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                // Draw arrows for direction
+                drawArrow(x1, y1, x2, y2);
+            }
+        }
+
+        function drawArrow(x1, y1, x2, y2) {
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const arrowSize = 6;
+
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+    </script>
+</body>
+</html>

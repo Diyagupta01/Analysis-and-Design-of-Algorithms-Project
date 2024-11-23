@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prim's and Kruskal's Algorithm Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #333;
+            color: #ff5c5c;
+        }
+
+        #graph {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 0 auto;
+            border: 2px solid rgb(110, 110, 110);
+            border-radius: 10px;
+        }
+
+        .node {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgb(255, 213, 0);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            color: rgb(0, 0, 0);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .edge {
+            position: absolute;
+            background-color: rgb(215, 215, 215);
+            transform-origin: 0 0;
+        }
+
+        .edge.prim {
+            background-color: rgb(6, 206, 16);
+        }
+
+        .edge.kruskal {
+            background-color: rgb(255, 0, 234);
+        }
+
+        .weight {
+            position: absolute;
+            background-color: white;
+            padding: 2px 5px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid black;
+            transform: translate(-50%, -50%);
+        }
+
+        button, select {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #02c0d9ea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover, select:hover {
+            background-color: #00929c;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Prim's and Kruskal's Algorithm Visualization</h1>
+    <button onclick="generateGraph()">Generate Random Graph</button>
+    <button onclick="runPrim()">Run Prim's Algorithm</button>
+    <button onclick="runKruskal()">Run Kruskal's Algorithm</button>
+    <div id="graph"></div>
+
+    <script>
+        let nodes = [];
+        let edges = [];
+        const graph = document.getElementById("graph");
+
+        // Generate random graph
+        function generateGraph() {
+            graph.innerHTML = ''; // Clear previous graph
+            nodes = [];
+            edges = [];
+
+            // Generate random nodes
+            const nodeCount = 5 + Math.floor(Math.random() * 3); // Between 5 and 7 nodes
+            for (let i = 0; i < nodeCount; i++) {
+                const x = Math.random() * 550 + 25; // Keep nodes inside the container
+                const y = Math.random() * 550 + 25;
+                nodes.push({ id: i, x, y });
+                createNodeElement(nodes[i]);
+            }
+
+            // Generate edges with random weights
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const weight = Math.floor(Math.random() * 20) + 1; // Random weight (1–20)
+                    edges.push({ start: nodes[i], end: nodes[j], weight });
+                    createEdgeElement(edges[edges.length - 1]);
+                }
+            }
+        }
+
+        // Create node elements
+        function createNodeElement(node) {
+            const nodeElement = document.createElement("div");
+            nodeElement.classList.add("node");
+            nodeElement.style.left = `${node.x - 15}px`;
+            nodeElement.style.top = `${node.y - 15}px`;
+            nodeElement.innerText = node.id;
+            graph.appendChild(nodeElement);
+        }
+
+        // Create edge elements
+        function createEdgeElement(edge, type = "") {
+            const edgeElement = document.createElement("div");
+            edgeElement.classList.add("edge");
+            if (type) edgeElement.classList.add(type);
+
+            const dx = edge.end.x - edge.start.x;
+            const dy = edge.end.y - edge.start.y;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+            edgeElement.style.width = `${length}px`;
+            edgeElement.style.height = `3px`;
+            edgeElement.style.left = `${edge.start.x}px`;
+            edgeElement.style.top = `${edge.start.y}px`;
+            edgeElement.style.transform = `rotate(${angle}deg)`;
+
+            graph.appendChild(edgeElement);
+
+            // Add weight label
+            const weightLabel = document.createElement("div");
+            weightLabel.classList.add("weight");
+            weightLabel.innerText = edge.weight;
+
+            const midX = (edge.start.x + edge.end.x) / 2;
+            const midY = (edge.start.y + edge.end.y) / 2;
+
+            weightLabel.style.left = `${midX}px`;
+            weightLabel.style.top = `${midY}px`;
+
+            graph.appendChild(weightLabel);
+            edge.element = edgeElement; // Store reference for later removal
+        }
+
+        // Run Prim's Algorithm
+        function runPrim() {
+            clearEdges();
+            const visited = new Set();
+            const edgeQueue = [];
+            const mstEdges = [];
+            const startNode = nodes[0];
+            visited.add(startNode);
+
+            edges.forEach(edge => {
+                if (edge.start === startNode || edge.end === startNode) edgeQueue.push(edge);
+            });
+
+            while (visited.size < nodes.length) {
+                edgeQueue.sort((a, b) => a.weight - b.weight);
+                const minEdge = edgeQueue.shift();
+                const nextNode = visited.has(minEdge.start) ? minEdge.end : minEdge.start;
+
+                if (!visited.has(nextNode)) {
+                    mstEdges.push(minEdge);
+                    visited.add(nextNode);
+
+                    edges.forEach(edge => {
+                        if (edge.start === nextNode || edge.end === nextNode) {
+                            if (!visited.has(edge.start) || !visited.has(edge.end)) {
+                                edgeQueue.push(edge);
+                            }
+                        }
+                    });
+                }
+            }
+
+            mstEdges.forEach((edge, index) => {
+                setTimeout(() => createEdgeElement(edge, "prim"), index * 500);
+            });
+        }
+
+        // Union-Find (Disjoint Set) Helper Functions for Kruskal's Algorithm
+        function find(parent, i) {
+            if (parent[i] === i) return i;
+            return parent[i] = find(parent, parent[i]);
+        }
+
+        function union(parent, rank, x, y) {
+            const rootX = find(parent, x);
+            const rootY = find(parent, y);
+
+            if (rootX !== rootY) {
+                if (rank[rootX] < rank[rootY]) {
+                    parent[rootX] = rootY;
+                } else if (rank[rootX] > rank[rootY]) {
+                    parent[rootY] = rootX;
+                } else {
+                    parent[rootY] = rootX;
+                    rank[rootX]++;
+                }
+            }
+        }
+
+        // Run Kruskal's Algorithm
+        function runKruskal() {
+            clearEdges();
+            const mstEdges = [];
+            const parent = [];
+            const rank = [];
+
+            // Initialize Union-Find structure
+            for (let i = 0; i < nodes.length; i++) {
+                parent[i] = i;
+                rank[i] = 0;
+            }
+
+            // Sort edges by weight
+            edges.sort((a, b) => a.weight - b.weight);
+
+            // Add edges to MST (avoiding cycles)
+            edges.forEach(edge => {
+                const u = edge.start.id;
+                const v = edge.end.id;
+                if (find(parent, u) !== find(parent, v)) {
+                    mstEdges.push(edge);
+                    union(parent, rank, u, v);
+                }
+            });
+
+            // Show MST edges step by step
+            mstEdges.forEach((edge, index) => {
+                setTimeout(() => createEdgeElement(edge, "kruskal"), index * 500);
+            });
+        }
+
+        // Clear all edges
+        function clearEdges() {
+            document.querySelectorAll(".edge").forEach(edge => edge.remove());
+        }
+    </script>
+</body>
+
+</html>

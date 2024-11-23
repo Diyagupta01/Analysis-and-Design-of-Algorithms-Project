@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fun with Algo</title>
+  <style>
+    /* Background and general styling */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle, #1c1c1c, #000);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start; /* Keep content at the top initially */
+      min-height: 100vh;
+      padding: 20px; /* Add padding around the body */
+      overflow-y: auto; /* Allow scrolling if content overflows */
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff4d4d;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 5px rgba(255, 77, 77, 0.6);
+    }
+
+    /* Container for cards */
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 100px;
+      justify-content: center;
+      align-items: flex-start; /* Align cards to the top */
+      max-width: 1200px;
+      margin: 0 auto;
+      perspective: 1200px; /* For 3D effect */
+      padding-bottom: 50px; /* Add padding at the bottom of the card container */
+    }
+
+    /* Each card styling */
+    .card {
+      width: 250px;
+      height: 320px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateY(0deg);
+      transition: transform 0.8s ease;
+      cursor: pointer;
+      margin-bottom: 30px; /* Add margin at the bottom of each card */
+    }
+
+    .card:hover {
+      transform: rotateY(180deg);
+    }
+
+    /* Card front and back */
+    .card .front,
+    .card .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(255, 255, 255, 0.5);
+    }
+
+    .card .front {
+      background: linear-gradient(135deg, #ff4d4d, #ff9966);
+    }
+
+    .card .back {
+      background: linear-gradient(135deg, #1e1e1e, #444);
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    /* Text styling */
+    .card h3 {
+      margin: 0;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .card p {
+      margin: 10px 0;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    /* Button styling */
+    .card a {
+      text-decoration: none;
+      color: #ff4d4d;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .card a:hover {
+      background: #ff4d4d;
+      color: white;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .card-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card {
+        width: 200px;
+        height: 300px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Game Your Way to Algorithm Mastery!</h1><br />
+  <div class="card-container">
+    <!-- Card 1 -->
+    <div class="card">
+        <div class="front">
+          <h3>Sudoku</h3>
+          <p>Backtracking Algorithm</p>
+        </div>
+        <div class="back">
+          <h3>Sudoku</h3><br>
+          <a href="sudoku/index.html" target="_blank">Play Now</a>
+        </div>
+      </div>
+  
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="front">
+          <h3>Maze Solver</h3>
+          <p>A* Algorithm</p>
+        </div>
+        <div class="back">
+          <h3>Maze Solver</h3>
+          <a href="maze/index.html" target="_blank">Play Now</a>
+        </div>
+      </div>
+  
+      <!-- Card 3 -->
+      <div class="card">
+        <div class="front">
+          <h3>Tic Tac Toe</h3>
+          <p>Minimax Algorithm</p>
+        </div>
+        <div class="back">
+          <h3>Tic Tac Toe</h3>
+          <a href="TicTacToe/index.html" target="_blank">Play Now</a>
+        </div>
+      </div>
+  
+      <!-- Card 4 -->
+      <div class="card">
+        <div class="front">
+          <h3>8 Puzzle</h3>
+          <p>A* Algorithm</p>
+        </div>
+        <div class="back">
+          <h3>8 Puzzle</h3>
+          <a href="8puzzle/index.html" target="_blank">Play Now</a>
+        </div>
+      </div>
+  
+      <!-- Card 5 -->
+      <div class="card">
+        <div class="front">
+          <h3>2048</h3>
+          <p>Merge Algorithm</p>
+        </div>
+        <div class="back">
+          <h3>2048</h3>
+          <a href="2048/index.html" target="_blank">Play Now</a>
+        </div>
+      </div>
+  
+      <!-- Card 6 -->
+      <div class="card">
+        <div class="front">
+          <h3>Prim's & Kruskal's</h3>
+          <p>MST Algorithms</p>
+        </div>
+        <div class="back">
+          <h3>Prim's & Kruskal's</h3>
+          <a href="visualise/index.html" target="_blank">Visualize</a>
+        </div>
+    </div>
+  </div>
+</body>
+</html>
